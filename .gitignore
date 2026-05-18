@@ -19,3 +19,23 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Virtual environments
+venv/
+venv310/
+
+# Packages (offline wheels)
+packages/
+
+# Env
+.env
+4e37eb8 (Added remaining files)
+# Ignore datasets
+data/
+*.zip
+
+# Ignore models (optional if large)
+backend/models/
+
+# Ignore virtual env
+backend/venv310/
