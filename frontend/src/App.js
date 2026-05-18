@@ -4,14 +4,16 @@ import i18n from "i18next";
 import soilImg from "./assets/imm.jpeg";
 
 function App() {
+  const [error, setError] = useState("");
   const { t } = useTranslation();
 
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [result, setResult] = useState(null);
 
-  // 🔥 BACKEND CONNECTION
+  // BACKEND CONNECTION
   const handleDetect = async () => {
+    setError("");
     if (!image) {
       alert("Please upload image");
       return;
@@ -27,27 +29,31 @@ function App() {
       });
 
       const data = await res.json();
-
+      if (!res.ok || data.error) {
+        setError(data.error || "📶 Please turn on internet / mobile data");
+        return;
+      }
+      setError("");
       setResult({
         soil: data.soil,
         crops: data.crops.map((c) => ({
           name: c.crop,
-          confidence: c.confidence,
+          
         })),
       });
 
     } catch (error) {
       console.error(error);
-      alert("Backend connection failed");
+      setError("📶 No internet connection. Please turn on mobile data");
     }
   };
 
   return (
     <div className="bg-[#f5f3ef] text-gray-900 min-h-screen">
-
+      
       {/* NAVBAR */}
       <div className="flex justify-between items-center px-8 py-4 bg-white shadow-sm">
-        <h1 className="text-xl font-bold">🌾 Rythu Mitra AI</h1>
+        <h1 className="text-xl font-bold">🌾 {t("titleApp")}</h1>
 
         <div className="flex gap-6 text-sm">
   <span
@@ -108,7 +114,7 @@ function App() {
         <div className="relative z-10 text-white px-6">
 
           <h1 className="text-6xl md:text-7xl font-bold mb-4">
-            Rythu Mitra <span className="text-green-400">AI</span>
+            {t("titleApp")} <span className="text-green-400">AI</span>
           </h1>
 
           <p className="text-xl md:text-2xl mb-4">
@@ -132,10 +138,6 @@ function App() {
   >
     {t("upload")}
   </button>
-
-
-  
-
 </div>
 
         </div>
@@ -146,10 +148,10 @@ function App() {
 
         <div className="text-center mb-16">
           <p className="text-sm tracking-widest text-gray-700 mb-2">
-            HOW IT WORKS
+            {t("how")}
           </p>
           <h2 className="text-4xl font-bold">
-            Three simple steps
+            {t("howTitle")}
           </h2>
         </div>
 
@@ -159,24 +161,24 @@ function App() {
             <div className="absolute -top-4 left-6 bg-black text-white text-xs px-4 py-1 rounded-full">
               STEP 01
             </div>
-            <h3 className="text-xl font-bold mb-2">Snap your soil</h3>
-            <p className="text-gray-600">Take a soil photo.</p>
+            <h3 className="text-xl font-bold mb-2">{t("step1Title")}</h3>
+            <p className="text-gray-600">{t("step1Desc")}</p>
           </div>
 
           <div className="bg-white/80 backdrop-blur rounded-3xl p-8 relative shadow-md hover:shadow-lg transition">
             <div className="absolute -top-4 left-6 bg-black text-white text-xs px-4 py-1 rounded-full">
               STEP 02
             </div>
-            <h3 className="text-xl font-bold mb-2">AI analyzes</h3>
-            <p className="text-gray-600">Model predicts soil.</p>
+            <h3 className="text-xl font-bold mb-2">{t("step2Title")}</h3>
+            <p className="text-gray-600">{t("step2Desc")}</p>
           </div>
 
           <div className="bg-white/80 backdrop-blur rounded-3xl p-8 relative shadow-md hover:shadow-lg transition">
             <div className="absolute -top-4 left-6 bg-black text-white text-xs px-4 py-1 rounded-full">
               STEP 03
             </div>
-            <h3 className="text-xl font-bold mb-2">Get crops</h3>
-            <p className="text-gray-600">Top 3 crops shown.</p>
+            <h3 className="text-xl font-bold mb-2">{t("step3Title")}</h3>
+            <p className="text-gray-600">{t("step3Desc")}</p>
           </div>
 
         </div>
@@ -190,7 +192,11 @@ function App() {
         <h2 className="text-3xl font-bold text-center mb-6">
           {t("analyzeSoil")}
         </h2>
-
+        {error && (
+          <p className="text-red-600 text-center mb-4 font-semibold">
+            {error}
+            </p>
+          )}
         <div
           className="border-2 border-dashed border-green-600 p-10 text-center rounded-xl cursor-pointer hover:bg-green-50 transition"
           onClick={() => document.getElementById("fileInput").click()}
@@ -239,7 +245,7 @@ function App() {
           <div className="max-w-md mx-auto mb-10">
             <div className="bg-white p-6 rounded-xl shadow text-center">
               <h3>{t("soil")}</h3>
-              <p className="text-2xl font-bold">{result.soil}</p>
+              <p className="text-2xl font-bold">{t(result.soil.toLowerCase(), result.soil)}</p>
             </div>
           </div>
 
@@ -253,29 +259,18 @@ function App() {
                 key={i}
                 className="bg-[#e9e3d9] rounded-2xl p-6 shadow-sm relative hover:shadow-md transition"
               >
-                <div className="absolute top-4 right-4 bg-green-200 text-green-800 text-xs px-3 py-1 rounded-full font-semibold">
-                  RANK #{i + 1}
-                </div>
+                
 
                 <h3 className="text-xl font-bold mb-2">
-                  {c.name}
+                  {t(c.name.toLowerCase().replace(" ", "_"), c.name)}
+                  <p>{t("cropDesc")}</p>
                 </h3>
 
-                <p className="text-sm text-gray-600 mb-4">
-                  Suitable crop based on soil conditions
-                </p>
+                
 
-                <div className="flex justify-between text-sm mb-1">
-                  <span>{t("confidence")}</span>
-                  <span>{c.confidence}</span>
-                </div>
+                
 
-                <div className="w-full bg-gray-300 rounded-full h-2">
-                  <div
-                    className="bg-green-700 h-2 rounded-full"
-                    style={{ width: `${c.confidence * 100}%` }}
-                  ></div>
-                </div>
+                
 
               </div>
             ))}
@@ -290,16 +285,15 @@ function App() {
   {/* TITLE */}
   <div className="text-center mb-12">
     <p className="text-xs tracking-widest text-gray-500 mb-2">
-      WHY RYTHU MITRA
+      {t("features")}
     </p>
 
     <h2 className="text-4xl font-bold mb-4">
-      Smarter farming, made simple
+      {t("whyTitle")}
     </h2>
 
     <p className="text-gray-600 max-w-2xl mx-auto">
-      A modern decision tool that respects how farmers already work — built with agronomists,
-      powered by AI.
+      {t("whySubtitle")}
     </p>
   </div>
 
@@ -315,9 +309,9 @@ function App() {
       />
 
       <div className="absolute bottom-6 left-6 text-white">
-        <p className="text-xs opacity-80">TRUSTED BY FARMERS</p>
+        <p className="text-xs opacity-80">{t("trusted")}</p>
         <p className="text-2xl font-bold">
-          From your hands to harvest.
+          {t("tagline")}
         </p>
       </div>
     </div>
@@ -330,10 +324,9 @@ function App() {
         <div className="bg-green-100 w-10 h-10 flex items-center justify-center rounded-xl mb-4">
           🧠
         </div>
-        <h3 className="font-bold text-lg">AI Soil Analysis</h3>
+        <h3 className="font-bold text-lg">{t("feature1Title")}</h3>
         <p className="text-gray-600 text-sm mt-2">
-          Computer vision identifies soil type, texture, and moisture from a single photo.
-        </p>
+ {t("feature1Desc")}        </p>
       </div>
 
       {/* CARD 2 */}
@@ -341,9 +334,9 @@ function App() {
         <div className="bg-green-100 w-10 h-10 flex items-center justify-center rounded-xl mb-4">
           🌱
         </div>
-        <h3 className="font-bold text-lg">Better Crop Decisions</h3>
+        <h3 className="font-bold text-lg">{t("feature2Title")}</h3>
         <p className="text-gray-600 text-sm mt-2">
-          Recommendations grounded in soil science, weather data, and local trends.
+          {t("feature2Desc")}
         </p>
       </div>
 
@@ -352,9 +345,9 @@ function App() {
         <div className="bg-green-100 w-10 h-10 flex items-center justify-center rounded-xl mb-4">
           📈
         </div>
-        <h3 className="font-bold text-lg">Higher Income</h3>
+        <h3 className="font-bold text-lg">{t("feature3Title")}</h3>
         <p className="text-gray-600 text-sm mt-2">
-          Farmers can improve yield and profits using AI-based recommendations.
+          {t("feature3Desc")}
         </p>
       </div>
 
@@ -363,9 +356,9 @@ function App() {
         <div className="bg-green-100 w-10 h-10 flex items-center justify-center rounded-xl mb-4">
           📱
         </div>
-        <h3 className="font-bold text-lg">Built for Farmers</h3>
+        <h3 className="font-bold text-lg">{t("feature4Title")}</h3>
         <p className="text-gray-600 text-sm mt-2">
-          Simple UI, works on any phone, supports multiple languages.
+          {t("feature4Desc")}
         </p>
       </div>
 
